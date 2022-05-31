@@ -1,0 +1,15 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace StoreAPI.Models;
+
+public class OrderDetail
+{
+    [Key]
+    public long OrderDetailId { get; set; }
+    
+    public long OrderLedgerId { get; set; }
+    
+    public int FoodItemId { get; set; }
+    
+    public long CustomerId { get; set; }
+}
