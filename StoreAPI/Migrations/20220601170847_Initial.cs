@@ -25,14 +25,14 @@ namespace StoreAPI.Migrations
                 name: "FoodItems",
                 columns: table => new
                 {
-                    ItemId = table.Column<int>(type: "int", nullable: false)
+                    FoodItemId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ItemName = table.Column<string>(type: "nvarchar(100)", nullable: false),
+                    FoodItemName = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FoodItems", x => x.ItemId);
+                    table.PrimaryKey("PK_FoodItems", x => x.FoodItemId);
                 });
 
             migrationBuilder.CreateTable(
@@ -64,18 +64,18 @@ namespace StoreAPI.Migrations
                     OrderDetailId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     OrderLedgerId = table.Column<long>(type: "bigint", nullable: false),
-                    ItemId = table.Column<int>(type: "int", nullable: false),
-                    ItemPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    FoodItemId = table.Column<int>(type: "int", nullable: false),
+                    FoodItemPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_OrderDetails", x => x.OrderDetailId);
                     table.ForeignKey(
-                        name: "FK_OrderDetails_FoodItems_ItemId",
-                        column: x => x.ItemId,
+                        name: "FK_OrderDetails_FoodItems_FoodItemId",
+                        column: x => x.FoodItemId,
                         principalTable: "FoodItems",
-                        principalColumn: "ItemId",
+                        principalColumn: "FoodItemId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_OrderDetails_OrderLedgers_OrderLedgerId",
@@ -86,9 +86,9 @@ namespace StoreAPI.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderDetails_ItemId",
+                name: "IX_OrderDetails_FoodItemId",
                 table: "OrderDetails",
-                column: "ItemId");
+                column: "FoodItemId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderDetails_OrderLedgerId",

@@ -38,22 +38,22 @@ namespace StoreAPI.Migrations
                     b.ToTable("Customers");
                 });
 
-            modelBuilder.Entity("StoreAPI.Models.Item", b =>
+            modelBuilder.Entity("StoreAPI.Models.FoodItem", b =>
                 {
-                    b.Property<int>("ItemId")
+                    b.Property<int>("FoodItemId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ItemId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FoodItemId"), 1L, 1);
 
-                    b.Property<string>("ItemName")
+                    b.Property<string>("FoodItemName")
                         .IsRequired()
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("ItemId");
+                    b.HasKey("FoodItemId");
 
                     b.ToTable("FoodItems");
                 });
@@ -66,10 +66,10 @@ namespace StoreAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("OrderDetailId"), 1L, 1);
 
-                    b.Property<int>("ItemId")
+                    b.Property<int>("FoodItemId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("ItemPrice")
+                    b.Property<decimal>("FoodItemPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<long>("OrderLedgerId")
@@ -80,7 +80,7 @@ namespace StoreAPI.Migrations
 
                     b.HasKey("OrderDetailId");
 
-                    b.HasIndex("ItemId");
+                    b.HasIndex("FoodItemId");
 
                     b.HasIndex("OrderLedgerId");
 
@@ -118,21 +118,19 @@ namespace StoreAPI.Migrations
 
             modelBuilder.Entity("StoreAPI.Models.OrderDetail", b =>
                 {
-                    b.HasOne("StoreAPI.Models.Item", "Item")
+                    b.HasOne("StoreAPI.Models.FoodItem", "FoodItem")
                         .WithMany()
-                        .HasForeignKey("ItemId")
+                        .HasForeignKey("FoodItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("StoreAPI.Models.OrderLedger", "OrderLedger")
+                    b.HasOne("StoreAPI.Models.OrderLedger", null)
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderLedgerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Item");
-
-                    b.Navigation("OrderLedger");
+                    b.Navigation("FoodItem");
                 });
 
             modelBuilder.Entity("StoreAPI.Models.OrderLedger", b =>

@@ -8,14 +8,11 @@ public class OrderDetail
     public long OrderDetailId { get; set; }
     
     public long OrderLedgerId { get; set; }
-    
-    public OrderLedger OrderLedger { get; set; }
-    
-    public int ItemId { get; set; }
-    
-    public Item Item { get; set; }
 
-    public decimal ItemPrice { get; set; }
+    public int FoodItemId { get; set; }
+    public FoodItem FoodItem { get; set; }
+
+    public decimal FoodItemPrice { get; set; }
     
     public int Quantity { get; set; }
 }

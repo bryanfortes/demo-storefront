@@ -11,24 +11,24 @@ namespace StoreAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CustomersController : ControllerBase
+    public class FoodItemsController : ControllerBase
     {
         private readonly StorefrontDbContext _context;
 
-        public CustomersController(StorefrontDbContext context)
+        public FoodItemsController(StorefrontDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/Customers
+        // GET: api/FoodItems
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
+        public async Task<ActionResult<IEnumerable<FoodItem>>> GetFoodItems()
         {
-          if (_context.Customers == null)
+          if (_context.FoodItems == null)
           {
               return NotFound();
           }
-          return await _context.Customers.ToListAsync();
+          return await _context.FoodItems.ToListAsync();
         }
     }
 }

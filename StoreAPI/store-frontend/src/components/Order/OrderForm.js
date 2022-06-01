@@ -51,7 +51,7 @@ export default function OrderForm(props){
                     title: item.customerName
                 }));
                 customerList = [{id: 0, title: 'Select'}].concat(customerList);
-                setCustomerList(customerList)
+                setCustomerList(customerList);
             })
             .catch(err=> console.log(err))
     }, [])

@@ -3,13 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StoreAPI.Models;
 
-public class Item
+public class FoodItem
 {
     [Key]
-    public int ItemId { get; set; }
+    public int FoodItemId { get; set; }
     
     [Column(TypeName = "nvarchar(100)")]
-    public string ItemName { get; set; }
+    public string FoodItemName { get; set; }
     
     public decimal Price { get; set; }
 }
