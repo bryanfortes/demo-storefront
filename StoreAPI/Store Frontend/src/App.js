@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 import {Container, Typography} from "@material-ui/core";
 import Order from "./components/Order";
@@ -9,7 +8,7 @@ function App() {
       <Typography
         variant={'h2'}
         align={'center'}>
-        The General Store
+        Point-of-Sale App
       </Typography>
         <Order />
     </Container>

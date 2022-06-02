@@ -21,4 +21,7 @@ public class OrderLedger
     public decimal Total { get; set; }
     
     public List<OrderDetail> OrderDetails { get; set; }
+    
+    [NotMapped]
+    public string DeletedOrderItemIds { get; set; }
 }

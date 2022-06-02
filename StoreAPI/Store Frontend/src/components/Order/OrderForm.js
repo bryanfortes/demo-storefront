@@ -6,9 +6,12 @@ import ReplayIcon from '@material-ui/icons/Replay'
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import ReorderIcon from '@material-ui/icons/Reorder';
 import {createAPIEndpoint, ENDPOINTS} from "../../api";
-import {useForm} from "../../hooks/useForm";
+import {roundTo2DecimalPoint} from "../../utils";
+import Popup from "../../layouts/Popup";
+import OrderList from "./OrderList";
+import Notification from "../../layouts/Notification"
 
-const paymentMethods = [
+const payments = [
     { id: 'none', title: 'Select' },
     { id: 'Cash', title: 'Cash' },
     { id: 'Card', title: 'Card' },
@@ -38,10 +41,13 @@ const useStyles = makeStyles(theme => ({
 
 export default function OrderForm(props){
 
-    const {values, errors, handleInputChange} = props;
+    const {values, setValues, errors,setErrors, handleInputChange, resetFormControls} = props;
     const classes = useStyles();
 
-    const [customerList, setCustomerList] = useState([])
+    const [customerList, setCustomerList] = useState([]);
+    const [orderListVisibility,setOrderListVisibility] = useState(false);
+    const [orderId, setOrderId] = useState(0);
+    const [notify, setNotify] = useState({isOpen: false});
 
     useEffect(()=>{
         createAPIEndpoint(ENDPOINTS.CUSTOMER).fetchAll()
@@ -56,10 +62,71 @@ export default function OrderForm(props){
             .catch(err=> console.log(err))
     }, [])
 
+useEffect(()=>{
+    let total = values.orderDetails.reduce((tempTotal,item)=>{
+        return tempTotal+(item.quantity * item.foodItemPrice);
+    },0);
+    setValues({...values,
+    total:roundTo2DecimalPoint(total)
+    })
+}, [JSON.stringify(values.orderDetails)]);
 
+    useEffect(()=>{
+        if(orderId === 0) resetFormControls()
+        else{
+            createAPIEndpoint(ENDPOINTS.ORDER).fetchbyID(orderId)
+                .then(res =>{
+                    setValues(res.data);
+                    setErrors({});
+                })
+                .catch(err=>console.log(err))
+        }
 
-    return(
-        <Form>
+    },[orderId]);
+
+    const validateForm =() =>{
+        let temp = {};
+        temp.customerId = values.customerId !==0?"": "This field is required.";
+        temp.payment = values.payment !=="none"?"": "This field is required.";
+        temp.orderDetails = values.orderDetails.length !==0?"":"This field is required.";
+        setErrors({...temp});
+        return Object.values(temp).every(x => x==="");
+    }
+
+    const resetForm=()=>{
+        resetFormControls();
+        setOrderId(0);
+    }
+
+    const submitOrder = e =>{
+        e.preventDefault();
+        if(validateForm()){
+            if(values.orderLedgerId===0) {
+                createAPIEndpoint(ENDPOINTS.ORDER).create(values)
+                    .then(res => {
+                        resetFormControls();
+                        setNotify({isOpen: true, message:'New order has been created.'});
+                    })
+                    .catch(err => console.log(err));
+            }
+            else {
+                createAPIEndpoint(ENDPOINTS.ORDER).update(values.orderLedgerId,values)
+                    .then(res => {
+                        setOrderId(0);
+                        setNotify({isOpen: true, message:'The order has been updated.'});
+                    })
+                    .catch(err => console.log(err));
+            }
+            }
+
+    }
+
+    const openListOfOrders=()=>{
+        setOrderListVisibility(true);
+    }
+
+    return(<>
+        <Form onSubmit={submitOrder}>
             <Grid container>
                 <Grid item xs={6}>
                     <Input
@@ -78,6 +145,7 @@ export default function OrderForm(props){
                         onChange = {handleInputChange}
                         options={customerList}
                         value={values.customerId}
+                        error={errors.customerId}
                         />
                 </Grid>
                 <Grid item xs={6}>
@@ -85,8 +153,9 @@ export default function OrderForm(props){
                         label={'Payment Method'}
                         name={'payment'}
                         onChange = {handleInputChange}
-                        options={paymentMethods}
+                        options={payments}
                         value={values.payment}
+                        error={errors.payment}
                     />
                 <Input
                     disabled
@@ -105,15 +174,27 @@ export default function OrderForm(props){
                             type={'submit'}>Submit</MuiButton>
                         <MuiButton
                             size={'small'}
+                            onClick={resetForm}
                             startIcon={<ReplayIcon/>}>
 
                         </MuiButton>
                     </ButtonGroup>
                     <Button size={'large'}
+                     onClick={openListOfOrders}
                     startIcon={<ReorderIcon />}
                     >Orders</Button>
                 </Grid>
             </Grid>
     </Form>
+        <Popup
+            title={'List of Orders'}
+            openPopup={orderListVisibility}
+            setOpenPopup={setOrderListVisibility}>
+<OrderList
+    {...{setOrderId,setOrderListVisibility, resetFormControls, setNotify}}/>
+        </Popup>
+            <Notification
+                {...{notify, setNotify}}/>
+        </>
 )
 }

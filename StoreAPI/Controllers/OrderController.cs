@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -28,7 +29,7 @@ namespace StoreAPI
           {
               return NotFound();
           }
-            return await _context.OrderLedgers.ToListAsync();
+          return await _context.OrderLedgers.Include(x=> x.Customer).ToListAsync();
         }
 
         // GET: api/Order/5
@@ -39,14 +40,43 @@ namespace StoreAPI
           {
               return NotFound();
           }
-            var orderLedger = await _context.OrderLedgers.FindAsync(id);
+            //get item from order details
+            var orderDetails = await (from ledger in _context.Set<OrderLedger>()
+                                      join detail in _context.Set<OrderDetail>() 
+                                      on ledger.OrderLedgerId equals detail.OrderLedgerId
+                                      join foodItem in _context.Set<FoodItem>()
+                                      on detail.FoodItemId equals foodItem.FoodItemId
+                                      where ledger.OrderLedgerId == id
+                                      
+                                      select new
+                                      {
+                                          ledger.OrderLedgerId,
+                                          detail.OrderDetailId,
+                                          detail.FoodItemId,
+                                          detail.Quantity,
+                                          detail.FoodItemPrice,
+                                          foodItem.FoodItemName
+                                      }).ToListAsync();
+            //get order ledger
+            var orderLedger = await (from a in _context.Set<OrderLedger>()
+                where a.OrderLedgerId == id
+                select new
+                {
+                    a.OrderLedgerId,
+                    a.OrderNumber,
+                    a.CustomerId,
+                    a.Payment,
+                    a.Total,
+                    deletedOrderItemIds = "",
+                    orderDetails = orderDetails
+                }).FirstOrDefaultAsync();
 
             if (orderLedger == null)
             {
                 return NotFound();
             }
 
-            return orderLedger;
+            return Ok(orderLedger);
         }
 
         // PUT: api/Order/5
@@ -60,7 +90,23 @@ namespace StoreAPI
             }
 
             _context.Entry(orderLedger).State = EntityState.Modified;
+            
+            //existing food items &newly added food items
+            foreach (OrderDetail item in orderLedger.OrderDetails)
+            {
+                if (item.OrderDetailId == 0)
+                    _context.OrderDetails.Add(item);
+                else
+                    _context.Entry(item).State = EntityState.Modified;
+                
+            }
 
+            foreach (var i in orderLedger.DeletedOrderItemIds.Split(',').Where(x => x != ""))
+            {
+                OrderDetail y = _context.OrderDetails.Find(Convert.ToInt64(i));
+                _context.OrderDetails.Remove(y);
+            }
+            
             try
             {
                 await _context.SaveChangesAsync();
